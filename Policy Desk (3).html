@@ -1,0 +1,960 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Policy Desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Layout: cobalt "today" hero with a policy-health ring, a do-next agenda, a five-column lead board, and a studio that turns any update into a shareable JPG card. */
+  :root {
+    --bg: #eef0fb; --surface: #ffffff; --surface-2: #e4e8fb; --line: #d5daf3;
+    --fg: #0f1433; --muted: #55608a;
+    --accent: #2a3fd1; --accent-fg: #ffffff; --accent-soft: #dde3ff;
+    --sun: #ffc83d; --sun-fg: #3a2a00;
+    --hero-a: #2036c4; --hero-b: #4a62ff; --hero-fg: #ffffff; --hero-mute: #c9d1ff; --hero-track: rgba(255,255,255,.18);
+    --ok: #0f6b3a; --ok-bg: #d9f1e2; --warn: #7a4a00; --warn-bg: #fdecc8;
+    --bad: #a11d1d; --bad-bg: #fbdcdc; --info: #1d4f91; --info-bg: #dce9fb;
+    --font-display: "Syne", "Segoe UI", system-ui, sans-serif;
+    --font-body: "Manrope", "Segoe UI", system-ui, sans-serif;
+    --radius: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b0f24; --surface: #141a38; --surface-2: #1c2448; --line: #2a3466;
+      --fg: #e9ecff; --muted: #98a2d6; --accent: #8fa0ff; --accent-fg: #0b0f24; --accent-soft: #1f2a62;
+      --sun: #ffcf4d; --sun-fg: #3a2a00;
+      --hero-a: #19246f; --hero-b: #2d40bd;
+      --ok: #7fdca3; --ok-bg: #153625; --warn: #f2c56b; --warn-bg: #3b2e10;
+      --bad: #f19a9a; --bad-bg: #401a1a; --info: #9cc3f5; --info-bg: #15294a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b0f24; --surface: #141a38; --surface-2: #1c2448; --line: #2a3466;
+    --fg: #e9ecff; --muted: #98a2d6; --accent: #8fa0ff; --accent-fg: #0b0f24; --accent-soft: #1f2a62;
+    --sun: #ffcf4d; --sun-fg: #3a2a00;
+    --hero-a: #19246f; --hero-b: #2d40bd;
+    --ok: #7fdca3; --ok-bg: #153625; --warn: #f2c56b; --warn-bg: #3b2e10;
+    --bad: #f19a9a; --bad-bg: #401a1a; --info: #9cc3f5; --info-bg: #15294a;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.45;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0 96px;
+  }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 40; background: var(--bg); }
+  h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  .muted { color: var(--muted); }
+  .num { font-variant-numeric: tabular-nums; }
+
+  label.f { display: block; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .in { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; min-height: 44px; }
+  textarea.in { min-height: 84px; resize: vertical; }
+  .btn { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 9px 14px; min-height: 40px; font-weight: 700; text-decoration: none; color: var(--fg); display: inline-flex; align-items: center; gap: 6px; justify-content: center; text-align: center; }
+  .btn:hover { background: var(--surface-2); }
+  .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .btn.primary:hover { filter: brightness(1.1); }
+  .btn.wa { background: var(--ok-bg); color: var(--ok); border-color: transparent; }
+  .btn.sun { background: var(--sun); color: var(--sun-fg); border-color: transparent; }
+  .btn.small { min-height: 34px; padding: 6px 11px; font-size: 13px; }
+  .btn.danger { color: var(--bad); }
+  .btn.danger.armed { background: var(--bad); color: #fff; border-color: var(--bad); }
+
+  /* sign in */
+  .login { min-height: 86vh; display: grid; place-items: center; padding-top: 24px; }
+  .login-card { width: 100%; max-width: 420px; border-radius: 24px; overflow: hidden; background: var(--surface); border: 1px solid var(--line); }
+  .login-top { background: linear-gradient(135deg, var(--hero-a), var(--hero-b)); color: var(--hero-fg); padding: 28px 24px; }
+  .login-top h1 { font-size: 34px; line-height: 1.05; }
+  .login-top p { margin: 8px 0 0; color: var(--hero-mute); }
+  .login-body { padding: 22px 24px 24px; }
+  .err { color: var(--bad); font-weight: 700; font-size: 13px; min-height: 18px; margin: 6px 0 8px; }
+
+  /* header and nav */
+  header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); padding: 12px 0 8px; }
+  .top-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .mark { width: 38px; height: 38px; border-radius: 12px; background: var(--sun); color: var(--sun-fg); display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 19px; flex: none; }
+  .brand h1 { font-size: 20px; line-height: 1; }
+  .brand small { color: var(--muted); font-size: 12px; display: block; overflow-wrap: anywhere; }
+  .tabs { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0 4px; }
+  .tab { flex: none; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 15px; font-weight: 700; font-size: 13px; color: var(--muted); display: inline-flex; gap: 7px; align-items: center; }
+  .tab[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .dot { background: var(--bad); color: #fff; border-radius: 999px; font-size: 11px; padding: 0 6px; line-height: 17px; }
+  .search { margin: 8px 0 4px; }
+
+  /* hero */
+  .hero { background: linear-gradient(135deg, var(--hero-a), var(--hero-b)); color: var(--hero-fg); border-radius: 24px; padding: 22px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: center; margin: 12px 0 16px; position: relative; overflow: hidden; }
+  .hero::after { content: ""; position: absolute; width: 280px; height: 280px; border-radius: 50%; right: -90px; top: -110px; background: rgba(255,255,255,.07); pointer-events: none; }
+  .hero > * { position: relative; z-index: 1; min-width: 0; }
+  .hero .eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--hero-mute); font-weight: 700; }
+  .hero h2 { font-size: 30px; line-height: 1.08; margin: 6px 0 10px; }
+  .hero h2 em { font-style: normal; color: var(--sun); }
+  .kpis { display: flex; flex-wrap: wrap; gap: 8px; }
+  .kpi { background: rgba(255,255,255,.14); border-radius: 12px; padding: 8px 12px; min-width: 96px; }
+  .kpi b { font-family: var(--font-display); font-size: 22px; display: block; line-height: 1.1; }
+  .kpi span { font-size: 12px; color: var(--hero-mute); }
+  .ring { width: 150px; height: 150px; position: relative; }
+  .ring svg { width: 100%; height: 100%; }
+  .ring .mid { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+  .ring .mid b { font-family: var(--font-display); font-size: 30px; line-height: 1; }
+  .ring .mid span { font-size: 11px; color: var(--hero-mute); }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11px; color: var(--hero-mute); margin-top: 6px; max-width: 180px; justify-content: center; }
+  .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+  .ringbox { display: grid; justify-items: center; }
+  @media (max-width: 560px) { .hero { grid-template-columns: 1fr; } .ringbox { justify-items: start; grid-auto-flow: column; gap: 14px; align-items: center; } .legend { justify-content: flex-start; margin: 0; } }
+
+  /* agenda */
+  .sec-title { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 18px 0 10px; flex-wrap: wrap; }
+  .sec-title h2 { font-size: 20px; }
+  .agenda { display: grid; gap: 8px; }
+  .arow { display: grid; grid-template-columns: 74px minmax(0, 1fr) auto; gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; }
+  .arow .t { overflow-wrap: anywhere; }
+  .arow .t b { display: block; }
+  .arow .t span { font-size: 13px; color: var(--muted); }
+  .chipx { text-align: center; font-size: 12px; font-weight: 800; border-radius: 10px; padding: 7px 4px; }
+  .t-info { background: var(--info-bg); color: var(--info); }
+  .t-warn { background: var(--warn-bg); color: var(--warn); }
+  .t-ok { background: var(--ok-bg); color: var(--ok); }
+  .t-bad { background: var(--bad-bg); color: var(--bad); }
+  .t-neutral { background: var(--surface-2); color: var(--muted); }
+  @media (max-width: 480px) { .arow { grid-template-columns: 62px minmax(0, 1fr); } .arow .btn { grid-column: 1 / -1; } }
+
+  /* board */
+  .board-scroll { overflow-x: auto; padding-bottom: 10px; scroll-snap-type: x proximity; }
+  .board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 1fr); gap: 12px; min-width: min-content; }
+  .col { background: var(--surface-2); border-radius: var(--radius); padding: 10px; display: grid; gap: 8px; align-content: start; scroll-snap-align: start; min-width: 0; }
+  .col h3 { font-size: 14px; display: flex; justify-content: space-between; gap: 8px; padding: 2px 4px; }
+  .col h3 b { color: var(--muted); }
+  .kcard { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 11px; display: grid; gap: 7px; min-width: 0; }
+  .kname { text-align: left; border: 0; background: none; padding: 0; font-weight: 800; font-size: 15px; overflow-wrap: anywhere; }
+  .kmeta { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+  .kmeta b { color: var(--fg); }
+  .kempty { font-size: 12px; color: var(--muted); text-align: center; padding: 14px 6px; border: 1px dashed var(--line); border-radius: 12px; }
+
+  /* cards */
+  .list { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+  .card.alert { border-color: var(--bad); box-shadow: 0 0 0 3px var(--bad-bg); }
+  .card-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+  .card-head > div { min-width: 0; }
+  .card h3 { font-size: 18px; line-height: 1.2; overflow-wrap: anywhere; }
+  .kind { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 3px 14px; font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .meta b { color: var(--fg); font-weight: 700; }
+  .pill { font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .note { background: var(--surface-2); border-radius: 12px; padding: 9px 11px; font-size: 13px; overflow-wrap: anywhere; }
+  .note.warn { background: var(--warn-bg); color: var(--warn); }
+  .daybar { display: grid; gap: 6px; }
+  .daybar .tr { height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+  .daybar .fl { height: 100%; border-radius: 999px; background: var(--ok); }
+  .daybar.warn .fl { background: var(--warn); } .daybar.bad .fl { background: var(--bad); }
+  .daybar .row { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; flex-wrap: wrap; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .tag-example { font-size: 11px; font-weight: 800; color: var(--muted); border: 1px dashed var(--muted); border-radius: 6px; padding: 1px 6px; margin-left: 6px; vertical-align: middle; }
+  .empty { text-align: center; padding: 40px 12px; color: var(--muted); border: 1px dashed var(--line); border-radius: var(--radius); grid-column: 1 / -1; }
+  .steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+  .steps i { height: 6px; border-radius: 3px; background: var(--surface-2); }
+  .steps i.on { background: var(--accent); }
+
+  .fab { position: fixed; z-index: 35; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--sun); color: var(--sun-fg); border: 0; border-radius: 18px; padding: 14px 20px; font-weight: 800; box-shadow: 0 8px 24px rgba(10, 16, 60, .3); }
+
+  /* sheets */
+  .overlay { position: fixed; inset: 0; z-index: 50; background: rgba(6, 10, 36, .65); display: flex; align-items: flex-end; justify-content: center; }
+  .sheet { width: 100%; max-width: 560px; max-height: 94%; overflow-y: auto; background: var(--surface); border-radius: 22px 22px 0 0; padding: 18px max(16px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+  .sheet.wide { max-width: 940px; }
+  @media (min-width: 640px) { .overlay { align-items: center; } .sheet { border-radius: 22px; } }
+  .sheet-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .sheet-head h2 { font-size: 22px; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+  .grid2 > div, .stack > div { min-width: 0; }
+  .stack { display: grid; gap: 12px; margin-bottom: 12px; }
+  .group { border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: grid; gap: 12px; margin-bottom: 12px; }
+  .group h4 { margin: 0; font-size: 12px; letter-spacing: .07em; text-transform: uppercase; color: var(--accent); }
+  .group.policy { background: var(--accent-soft); }
+  .logbox { font-size: 12px; color: var(--muted); display: grid; gap: 3px; margin-top: 6px; }
+  .logbox b { color: var(--fg); }
+
+  /* studio */
+  .studio { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 18px; align-items: start; }
+  @media (max-width: 720px) { .studio { grid-template-columns: 1fr; } }
+  .prev { background: var(--surface-2); border-radius: 16px; padding: 10px; display: grid; place-items: center; }
+  .prev img { width: 100%; height: auto; border-radius: 10px; display: block; -webkit-touch-callout: default; user-select: auto; }
+  .ctl { display: grid; gap: 12px; min-width: 0; }
+  .ctl .actions .btn { flex: 1 1 140px; }
+  .hint { font-size: 12px; color: var(--muted); margin: 0; }
+  .backup-text { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; min-height: 120px; }
+  .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(86px + env(safe-area-inset-bottom, 0px)); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-weight: 700; z-index: 90; max-width: 90%; }
+</style>
+
+<div id="loginView" class="wrap login" hidden>
+  <form id="loginForm" class="login-card" novalidate>
+    <div class="login-top"><h1>Policy Desk</h1><p>Leads, renewals, claims and cancellations, with a ready-to-send card for every update.</p></div>
+    <div class="login-body">
+      <label class="f" for="loginEmail">Your email ID</label>
+      <input class="in" id="loginEmail" type="email" placeholder="you@example.com" autocomplete="email">
+      <p class="err" id="loginErr"></p>
+      <button class="btn primary" style="width:100%" type="submit">Open my desk</button>
+      <p class="muted" style="font-size:12px;margin:14px 0 0">Records stay in this browser on this device. The email only labels your session.</p>
+    </div>
+  </form>
+</div>
+
+<div id="appView" hidden>
+  <div class="wrap">
+    <header class="top">
+      <div class="top-row">
+        <div class="brand"><div class="mark">P</div><div><h1>Policy Desk</h1><small id="who"></small></div></div>
+        <div class="actions">
+          <button class="btn small" id="profileBtn" type="button">My details</button>
+          <button class="btn small" id="copyCsv" type="button">Excel text</button>
+          <button class="btn small" id="backupBtn" type="button">Backup</button>
+          <button class="btn small" id="logout" type="button">Sign out</button>
+        </div>
+      </div>
+      <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+      <input class="in search" id="search" type="search" placeholder="Search name, mobile, policy, claim or loan no" hidden>
+    </header>
+    <main id="view"></main>
+    <p class="muted" id="exampleNote" style="font-size:13px;margin-top:22px" hidden>Records tagged Example are samples. <button class="btn small" id="clearExamples" type="button">Remove examples</button></p>
+  </div>
+  <button class="fab" id="addBtn" type="button">+ New entry</button>
+</div>
+
+<!-- entry sheet -->
+<div class="overlay" id="sheetWrap" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-head"><h2 id="sheetTitle">New entry</h2><button class="btn small" id="closeSheet" type="button">Close</button></div>
+    <form id="entryForm" novalidate>
+      <div class="stack"><div><label class="f" for="type">Workflow</label>
+        <select class="in" id="type"><option value="Lead">Health insurance lead</option><option value="Claim">Claim registration and tracking</option><option value="Cancel">Policy cancellation</option></select></div></div>
+
+      <div data-sec="Lead">
+        <div class="group">
+          <h4>Lead details</h4>
+          <div class="grid2">
+            <div><label class="f" for="Lead_name">Customer name *</label><input class="in" id="Lead_name" name="name" type="text" autocomplete="off"></div>
+            <div><label class="f" for="Lead_contact">Customer contact no *</label><input class="in" id="Lead_contact" name="contact" type="tel" inputmode="tel"></div>
+            <div><label class="f" for="Lead_referredBy">Referred by</label><input class="in" id="Lead_referredBy" name="referredBy" type="text"></div>
+            <div><label class="f" for="Lead_vertical">Vertical</label><input class="in" id="Lead_vertical" name="vertical" type="text" list="verticals" placeholder="Retail health, senior citizen...">
+              <datalist id="verticals"><option value="Retail Health"><option value="Senior Citizen"><option value="Super Top-up"><option value="1 Cr Health"><option value="Family Floater"></datalist></div>
+          </div>
+          <div><label class="f" for="Lead_callBack">Customer needs call back on</label><input class="in" id="Lead_callBack" name="callBack" type="datetime-local"></div>
+          <div><label class="f" for="Lead_comments">Comments</label><textarea class="in" id="Lead_comments" name="comments" placeholder="Requirement, budget, family members covered"></textarea></div>
+          <div><label class="f" for="Lead_status">Status</label>
+            <select class="in" id="Lead_status" name="status">
+              <option>New Lead</option><option>Follow-up: Details Collected</option><option>Payment Done</option><option>Policy Issuance Under Process</option><option>Policy Issued</option><option>Lost</option>
+            </select></div>
+        </div>
+        <div class="group policy" id="closedGroup" hidden>
+          <h4>Policy issued: renewal tracking</h4>
+          <div class="grid2">
+            <div><label class="f" for="Lead_policyNo">Policy number *</label><input class="in" id="Lead_policyNo" name="policyNo" type="text"></div>
+            <div><label class="f" for="Lead_expiryDate">Policy expiry date *</label><input class="in" id="Lead_expiryDate" name="expiryDate" type="date"></div>
+            <div><label class="f" for="Lead_whatsapp">Customer mobile no for renewal tracking *</label><input class="in" id="Lead_whatsapp" name="whatsapp" type="tel" inputmode="tel"></div>
+            <div><label class="f" for="Lead_email">Customer email ID (optional)</label><input class="in" id="Lead_email" name="email" type="email"></div>
+          </div>
+          <p class="muted" style="margin:0;font-size:13px">The policy shows in Renewals and gets a red alert 30 days before expiry.</p>
+        </div>
+      </div>
+
+      <div data-sec="Claim" hidden>
+        <div class="group">
+          <h4>Claim details</h4>
+          <div class="grid2">
+            <div><label class="f" for="Claim_name">Customer name *</label><input class="in" id="Claim_name" name="name" type="text"></div>
+            <div><label class="f" for="Claim_mobile">Customer mobile *</label><input class="in" id="Claim_mobile" name="mobile" type="tel" inputmode="tel"></div>
+            <div><label class="f" for="Claim_nominee">Nominee mobile</label><input class="in" id="Claim_nominee" name="nominee" type="tel" inputmode="tel"></div>
+            <div><label class="f" for="Claim_policyNo">Policy number *</label><input class="in" id="Claim_policyNo" name="policyNo" type="text"></div>
+            <div><label class="f" for="Claim_claimNo">Claim reg no *</label><input class="in" id="Claim_claimNo" name="claimNo" type="text"></div>
+            <div><label class="f" for="Claim_status">Claim status</label>
+              <select class="in" id="Claim_status" name="status"><option>Claim Registered</option><option>Processing</option><option>Under Query</option><option>Claim Approved</option><option>Claim Settled</option></select></div>
+          </div>
+          <div id="queryBox" hidden><label class="f" for="Claim_queryNote">Query to share with customer</label><textarea class="in" id="Claim_queryNote" name="queryNote" placeholder="Documents or details the insurer is asking for"></textarea></div>
+        </div>
+      </div>
+
+      <div data-sec="Cancel" hidden>
+        <div class="group">
+          <h4>Cancellation details</h4>
+          <div class="grid2">
+            <div><label class="f" for="Cancel_name">Customer name *</label><input class="in" id="Cancel_name" name="name" type="text"></div>
+            <div><label class="f" for="Cancel_contact">Contact no *</label><input class="in" id="Cancel_contact" name="contact" type="tel" inputmode="tel"></div>
+            <div><label class="f" for="Cancel_loanNo">Loan number *</label><input class="in" id="Cancel_loanNo" name="loanNo" type="text"></div>
+            <div><label class="f" for="Cancel_policyNo">Policy number *</label><input class="in" id="Cancel_policyNo" name="policyNo" type="text"></div>
+          </div>
+          <div><label class="f" for="Cancel_status">Status</label><select class="in" id="Cancel_status" name="status"><option>Pending</option><option>In Progress</option><option>Resolved</option></select></div>
+        </div>
+      </div>
+
+      <div class="group">
+        <h4>Notes</h4>
+        <div><label class="f" for="noteIn">Add a note</label><input class="in" id="noteIn" type="text" placeholder="e.g. Called, asked to ring after 6 pm"></div>
+        <div class="logbox" id="logList"></div>
+      </div>
+
+      <p class="err" id="formErr"></p>
+      <div class="actions">
+        <button class="btn danger" id="delBtn" type="button" hidden>Delete</button>
+        <button class="btn" id="cancelSheet" type="button" style="flex:1">Cancel</button>
+        <button class="btn primary" type="submit" style="flex:1">Save entry</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- studio -->
+<div class="overlay" id="studioWrap" hidden>
+  <div class="sheet wide" role="dialog" aria-modal="true" aria-labelledby="studioTitle">
+    <div class="sheet-head"><h2 id="studioTitle">Send update</h2><button class="btn small" id="closeStudio" type="button">Close</button></div>
+    <div class="studio">
+      <div>
+        <div class="prev"><img id="cardImg" alt="Preview of the message card as a JPG image"></div>
+        <p class="hint" style="margin-top:8px">The card is a JPG. Press and hold it (or right-click) and choose Save image.</p>
+      </div>
+      <div class="ctl">
+        <div class="grid2">
+          <div><label class="f" for="stKind">Card</label><select class="in" id="stKind"></select></div>
+          <div><label class="f" for="stTone">Tone</label><select class="in" id="stTone"><option value="friendly">Friendly</option><option value="formal">Formal</option></select></div>
+        </div>
+        <div id="stToWrap" hidden><label class="f" for="stTo">Send to</label><select class="in" id="stTo"><option value="customer">Customer</option><option value="nominee">Nominee</option></select></div>
+        <div><label class="f" for="stMsg">Message on the card</label><textarea class="in" id="stMsg" rows="5"></textarea></div>
+        <div class="actions">
+          <a class="btn wa" id="waLink" href="#" target="_blank" rel="noopener">Open WhatsApp</a>
+          <a class="btn" id="mailLink" href="#" target="_blank" rel="noopener">Open email</a>
+        </div>
+        <div class="actions">
+          <button class="btn sun" id="copyImg" type="button">Copy image</button>
+          <button class="btn" id="copyTxt" type="button">Copy message</button>
+        </div>
+        <p class="hint">WhatsApp and email open with the message typed in. To attach the picture, tap Copy image first, then paste it into the chat or mail.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- profile -->
+<div class="overlay" id="profileWrap" hidden>
+  <div class="sheet">
+    <div class="sheet-head"><h2>My details</h2><button class="btn small" id="closeProfile" type="button">Close</button></div>
+    <p class="muted" style="margin-top:0">These print at the bottom of every card and sign off every message.</p>
+    <div class="stack">
+      <div><label class="f" for="pName">Your name</label><input class="in" id="pName" type="text" placeholder="e.g. Kishore T"></div>
+      <div><label class="f" for="pPhone">Your phone</label><input class="in" id="pPhone" type="tel" placeholder="e.g. 98480 12345"></div>
+      <div><label class="f" for="pCompany">Company or brand on the card</label><input class="in" id="pCompany" type="text" placeholder="e.g. HDFC Ergo"></div>
+      <div><label class="f" for="pTag">One-line tagline</label><input class="in" id="pTag" type="text" placeholder="Your health insurance advisor"></div>
+    </div>
+    <div class="actions"><button class="btn primary" id="saveProfile" type="button" style="flex:1">Save details</button></div>
+  </div>
+</div>
+
+<!-- backup -->
+<div class="overlay" id="backupWrap" hidden>
+  <div class="sheet">
+    <div class="sheet-head"><h2>Backup and restore</h2><button class="btn small" id="closeBackup" type="button">Close</button></div>
+    <p class="muted" style="margin-top:0">Records live in this browser only. Copy the backup text and keep it in a note or email. Paste it below on any device to restore.</p>
+    <label class="f" for="backupOut">Backup text</label>
+    <textarea class="in backup-text" id="backupOut" readonly></textarea>
+    <div class="actions" style="margin:10px 0 18px"><button class="btn small primary" id="copyBackup" type="button">Copy backup</button></div>
+    <label class="f" for="backupIn">Restore from backup</label>
+    <textarea class="in backup-text" id="backupIn" placeholder="Paste backup text here"></textarea>
+    <p class="err" id="backupErr"></p>
+    <div class="actions"><button class="btn small" id="restoreBtn" type="button">Replace my records with this backup</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  var KEY = 'policydesk_records_v1', USER = 'policydesk_user_v1', PROF = 'policydesk_profile_v1';
+  var mem = { records: null, user: '', prof: null };
+  var state = { view: 'today', q: '', editing: null, delArmed: false, studio: null };
+
+  var CLOSED = 'Policy Issued';
+  var FLOW = ['New Lead', 'Follow-up: Details Collected', 'Payment Done', 'Policy Issuance Under Process', CLOSED];
+  var FLOW_TITLE = ['Lead received', 'Details collected', 'Payment received', 'Issuance in process', 'Policy issued'];
+  var NEXT_LABEL = ['Details collected', 'Payment done', 'Issuance under process', 'Policy issued'];
+  var LEGACY = { 'Closed / Policy Issued': CLOSED, 'Call Back Scheduled': 'New Lead', 'Interested': FLOW[1], 'Proposal Shared': FLOW[1] };
+  var CLAIM_FLOW = ['Claim Registered', 'Processing', 'Under Query', 'Claim Approved', 'Claim Settled'];
+  var CANCEL_FLOW = ['Pending', 'In Progress', 'Resolved'];
+  var REQUIRED = {
+    Lead: [['name', 'customer name'], ['contact', 'customer contact no']],
+    Claim: [['name', 'customer name'], ['mobile', 'customer mobile'], ['policyNo', 'policy number'], ['claimNo', 'claim reg no']],
+    Cancel: [['name', 'customer name'], ['contact', 'contact no'], ['loanNo', 'loan number'], ['policyNo', 'policy number']]
+  };
+
+  /* ---------- storage ---------- */
+  function load() { try { var raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw); } catch (e) {} return mem.records; }
+  function save(list) { mem.records = list; try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {} }
+  function getUser() { try { return localStorage.getItem(USER) || mem.user; } catch (e) { return mem.user; } }
+  function setUser(v) { mem.user = v; try { if (v) localStorage.setItem(USER, v); else localStorage.removeItem(USER); } catch (e) {} }
+  function getProf() {
+    var p = mem.prof;
+    try { var raw = localStorage.getItem(PROF); if (raw) p = JSON.parse(raw); } catch (e) {}
+    return p || { name: '', phone: '', company: '', tag: '' };
+  }
+  function setProf(p) { mem.prof = p; try { localStorage.setItem(PROF, JSON.stringify(p)); } catch (e) {} }
+
+  /* ---------- helpers ---------- */
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function isoDate(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function addDays(n) { var d = new Date(); d.setDate(d.getDate() + n); return isoDate(d); }
+  function stamp(n, h, m) { var d = new Date(); d.setDate(d.getDate() + n); return isoDate(d) + 'T' + pad(h) + ':' + pad(m); }
+  function nowStamp() { var d = new Date(); return isoDate(d) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+  function daysUntil(s) {
+    if (!s) return null;
+    var p = s.split('-'); var t = new Date(+p[0], +p[1] - 1, +p[2]);
+    var n = new Date(); n.setHours(0, 0, 0, 0);
+    return Math.round((t - n) / 86400000);
+  }
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function fmtDate(s) { if (!s) return ''; var p = s.split('-'); return +p[2] + ' ' + MON[+p[1] - 1] + ' ' + p[0]; }
+  function fmtStamp(s) { if (!s) return ''; var a = s.split('T'); var t = (a[1] || '').split(':'); var h = +t[0], ap = h >= 12 ? 'pm' : 'am'; h = h % 12 || 12; return fmtDate(a[0]) + ', ' + h + ':' + (t[1] || '00') + ' ' + ap; }
+  function phone(n) { var c = String(n || '').replace(/\D/g, ''); if (c.length === 11 && c[0] === '0') c = c.slice(1); return c.length === 10 ? '91' + c : c; }
+  function waHref(n, msg) { var p = phone(n); return p ? 'https://wa.me/' + p + '?text=' + encodeURIComponent(msg) : ''; }
+  function toast(msg) { var t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { t.hidden = true; }, 2400); }
+  function copy(text, done) {
+    function fallback() {
+      var ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta); toast(ok ? done : 'Copy was blocked. Select the text and copy it manually.');
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast(done); }, fallback); else fallback();
+  }
+  function byId(id) { return records().filter(function (x) { return x.id === id; })[0]; }
+
+  /* ---------- data ---------- */
+  function seed() {
+    return [
+      { id: 'ex1', ex: true, type: 'Lead', name: 'Suresh Babu', contact: '9848012345', referredBy: 'Branch manager', vertical: 'Retail Health', callBack: stamp(0, 17, 30), comments: 'Wants cover for self and wife.', status: FLOW[0] },
+      { id: 'ex6', ex: true, type: 'Lead', name: 'Meena Kumari', contact: '9553322110', referredBy: 'Friend', vertical: 'Super Top-up', callBack: '', comments: '', status: FLOW[2] },
+      { id: 'ex2', ex: true, type: 'Lead', name: 'Lakshmi Devi', contact: '9701234567', referredBy: 'Existing customer', vertical: 'Senior Citizen', callBack: '', comments: '', status: CLOSED, policyNo: 'HLT-4471029', expiryDate: addDays(18), email: 'lakshmi@example.com', whatsapp: '9701234567' },
+      { id: 'ex3', ex: true, type: 'Lead', name: 'Ravi Teja', contact: '9966554433', referredBy: 'Friend', vertical: '1 Cr Health', callBack: '', comments: '', status: CLOSED, policyNo: 'HLT-3320981', expiryDate: addDays(75), email: '', whatsapp: '9966554433' },
+      { id: 'ex4', ex: true, type: 'Claim', name: 'Ramesh Kumar', mobile: '9876543210', nominee: '9123456780', policyNo: 'POL100234', claimNo: 'CLM88990', status: 'Under Query', queryNote: 'Hospital final bill and discharge summary are pending.' },
+      { id: 'ex5', ex: true, type: 'Cancel', name: 'Anitha Rao', contact: '9440011223', loanNo: 'LN-2209841', policyNo: 'POL557102', status: 'In Progress' }
+    ];
+  }
+  function records() {
+    var r = load();
+    if (r === null || r === undefined) { r = seed(); save(r); }
+    var changed = false;
+    r.forEach(function (x) { if (x.type === 'Lead' && LEGACY[x.status]) { x.status = LEGACY[x.status]; changed = true; } });
+    if (changed) save(r);
+    return r;
+  }
+  function leadInfo(r) {
+    var closed = r.type === 'Lead' && r.status === CLOSED;
+    var d = closed ? daysUntil(r.expiryDate) : null;
+    return { closed: closed, days: d, due: closed && d !== null && d >= 0 && d <= 30, expired: closed && d !== null && d < 0 };
+  }
+  function callbackDue(r) {
+    if (r.type !== 'Lead' || r.status === CLOSED || r.status === 'Lost' || !r.callBack) return false;
+    var end = new Date(); end.setHours(23, 59, 59, 999);
+    return new Date(r.callBack) <= end;
+  }
+  function setStatus(id, status) {
+    save(records().map(function (r) {
+      if (r.id !== id) return r;
+      var n = Object.assign({}, r); n.status = status;
+      n.log = (r.log || []).concat([{ t: nowStamp(), text: 'Status: ' + status }]);
+      return n;
+    }));
+  }
+
+  /* ---------- agenda ---------- */
+  function agenda(list) {
+    var out = [];
+    list.forEach(function (r) {
+      var i = leadInfo(r);
+      if (i.expired && i.days >= -30) out.push({ p: 0, w: i.days, r: r, chip: 'Lapsed', tone: 'bad', title: 'Renewal lapsed: ' + r.name, sub: 'Policy ' + r.policyNo + ' expired ' + fmtDate(r.expiryDate) });
+      else if (i.due && i.days <= 7) out.push({ p: 1, w: i.days, r: r, chip: i.days + 'd left', tone: 'bad', title: 'Renewal: ' + r.name, sub: 'Policy ' + r.policyNo + ' expires ' + fmtDate(r.expiryDate) });
+      else if (i.due) out.push({ p: 3, w: i.days, r: r, chip: i.days + 'd left', tone: 'warn', title: 'Renewal: ' + r.name, sub: 'Policy ' + r.policyNo + ' expires ' + fmtDate(r.expiryDate) });
+      if (callbackDue(r)) out.push({ p: 2, w: 0, r: r, chip: 'Call back', tone: 'warn', title: 'Call ' + r.name, sub: fmtStamp(r.callBack) + ' &middot; ' + esc(r.contact), call: true });
+      if (r.type === 'Lead' && (r.status === FLOW[2] || r.status === FLOW[3])) out.push({ p: 5, w: 0, r: r, chip: r.status === FLOW[2] ? 'Paid' : 'Issuing', tone: 'info', title: 'Chase issuance: ' + r.name, sub: r.status });
+      if (r.type === 'Claim' && r.status === 'Under Query') out.push({ p: 4, w: 0, r: r, chip: 'Query', tone: 'warn', title: 'Query pending: ' + r.name, sub: 'Claim ' + r.claimNo });
+    });
+    out.sort(function (a, b) { return a.p - b.p || a.w - b.w; });
+    return out;
+  }
+  function greeting() { var h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; }
+
+  function ring(list) {
+    var b = { exp: 0, d30: 0, d90: 0, ok: 0 }, total = 0;
+    list.forEach(function (r) {
+      var i = leadInfo(r); if (!i.closed || i.days === null) return;
+      total++;
+      if (i.days < 0) b.exp++; else if (i.days <= 30) b.d30++; else if (i.days <= 90) b.d90++; else b.ok++;
+    });
+    var C = 2 * Math.PI * 54, off = 0, segs = [['exp', '#ff8a8a'], ['d30', '#ffc83d'], ['d90', '#9fb2ff'], ['ok', '#6ee7a8']];
+    var svg = '<svg viewBox="0 0 140 140" role="img" aria-label="Policy health: ' + b.exp + ' lapsed, ' + b.d30 + ' due in 30 days, ' + b.d90 + ' due in 90 days, ' + b.ok + ' later"><circle cx="70" cy="70" r="54" fill="none" stroke-width="16" style="stroke:var(--hero-track)"/>';
+    if (total) segs.forEach(function (s) {
+      var n = b[s[0]]; if (!n) return;
+      var len = n / total * C;
+      svg += '<circle cx="70" cy="70" r="54" fill="none" stroke="' + s[1] + '" stroke-width="16" stroke-dasharray="' + len + ' ' + (C - len) + '" stroke-dashoffset="' + (-off) + '" transform="rotate(-90 70 70)"/>';
+      off += len;
+    });
+    svg += '</svg>';
+    var lg = [['#ff8a8a', 'Lapsed ' + b.exp], ['#ffc83d', '30 days ' + b.d30], ['#9fb2ff', '90 days ' + b.d90], ['#6ee7a8', 'Later ' + b.ok]].map(function (x) { return '<span><i style="background:' + x[0] + '"></i>' + x[1] + '</span>'; }).join('');
+    return '<div class="ringbox"><div class="ring">' + svg + '<div class="mid"><b class="num">' + total + '</b><span>policies</span></div></div><div class="legend">' + lg + '</div></div>';
+  }
+
+  /* ---------- views ---------- */
+  var TABS = [['today', 'Today'], ['pipeline', 'Lead board'], ['renewals', 'Renewals'], ['claims', 'Claims'], ['cancel', 'Cancellations']];
+
+  function render() {
+    var list = records();
+    var dueN = list.filter(function (r) { return leadInfo(r).due; }).length;
+    $('tabs').innerHTML = TABS.map(function (t) {
+      return '<button class="tab" type="button" data-view="' + t[0] + '" aria-pressed="' + (state.view === t[0]) + '">' + t[1] + (t[0] === 'renewals' && dueN ? '<span class="dot">' + dueN + '</span>' : '') + '</button>';
+    }).join('');
+    $('search').hidden = state.view === 'today';
+    var q = state.q.trim().toLowerCase();
+    function match(r) { return !q || [r.name, r.contact, r.mobile, r.nominee, r.whatsapp, r.policyNo, r.claimNo, r.loanNo, r.email].join(' ').toLowerCase().indexOf(q) >= 0; }
+    var h = '';
+    if (state.view === 'today') h = todayView(list);
+    else if (state.view === 'pipeline') h = boardView(list.filter(function (r) { return r.type === 'Lead' && match(r); }));
+    else if (state.view === 'renewals') h = renewalsView(list.filter(function (r) { return leadInfo(r).closed && match(r); }));
+    else if (state.view === 'claims') h = cardsView(list.filter(function (r) { return r.type === 'Claim' && match(r); }), claimCard, 'No claims yet. Tap "New entry" to register one.');
+    else h = cardsView(list.filter(function (r) { return r.type === 'Cancel' && match(r); }), cancelCard, 'No cancellation requests yet.');
+    $('view').innerHTML = h;
+    $('exampleNote').hidden = !list.some(function (r) { return r.ex; });
+  }
+
+  function todayView(list) {
+    var ag = agenda(list);
+    var leads = list.filter(function (r) { return r.type === 'Lead'; });
+    var issued = leads.filter(function (r) { return r.status === CLOSED; }).length;
+    var rate = leads.length ? Math.round(issued / leads.length * 100) : 0;
+    var openClaims = list.filter(function (r) { return r.type === 'Claim' && r.status !== 'Claim Settled'; }).length;
+    var openCancel = list.filter(function (r) { return r.type === 'Cancel' && r.status !== 'Resolved'; }).length;
+    var d = new Date();
+    var head = '<section class="hero"><div><div class="eyebrow">' + d.getDate() + ' ' + MON[d.getMonth()] + ' ' + d.getFullYear() + '</div>' +
+      '<h2>' + greeting() + '. ' + (ag.length ? '<em>' + ag.length + ' thing' + (ag.length === 1 ? '' : 's') + '</em> need you today.' : 'You are all caught up.') + '</h2>' +
+      '<div class="kpis"><div class="kpi"><b class="num">' + leads.filter(function (r) { return r.status !== CLOSED && r.status !== 'Lost'; }).length + '</b><span>Open leads</span></div>' +
+      '<div class="kpi"><b class="num">' + rate + '%</b><span>Leads issued</span></div>' +
+      '<div class="kpi"><b class="num">' + openClaims + '</b><span>Open claims</span></div>' +
+      '<div class="kpi"><b class="num">' + openCancel + '</b><span>Cancellations</span></div></div></div>' + ring(list) + '</section>';
+    var rows = ag.slice(0, 12).map(function (a) {
+      return '<div class="arow"><div class="chipx t-' + a.tone + '">' + esc(a.chip) + '</div><div class="t"><b>' + esc(a.title) + '</b><span>' + (a.call ? a.sub : esc(a.sub)) + '</span></div>' +
+        '<button class="btn small primary" type="button" data-act="studio" data-id="' + a.r.id + '">Send card</button></div>';
+    }).join('');
+    return head + '<div class="sec-title"><h2>Do next</h2><span class="muted" style="font-size:13px">Most urgent first</span></div><div class="agenda">' + (rows || '<div class="empty">Nothing is due. New call backs, renewals and claim queries will show up here.</div>') + '</div>';
+  }
+
+  function boardView(leads) {
+    var cols = FLOW.concat(['Lost']);
+    var titles = FLOW_TITLE.concat(['Lost']);
+    var h = '<div class="sec-title"><h2>Lead board</h2><span class="muted" style="font-size:13px">Move a lead forward with one tap</span></div><div class="board-scroll"><div class="board">';
+    cols.forEach(function (c, k) {
+      var items = leads.filter(function (r) { return r.status === c; });
+      h += '<div class="col"><h3>' + titles[k] + '<b class="num">' + items.length + '</b></h3>' +
+        (items.map(kcard).join('') || '<div class="kempty">No leads here</div>') + '</div>';
+    });
+    return h + '</div></div>';
+  }
+  function kcard(r) {
+    var i = leadInfo(r), at = FLOW.indexOf(r.status);
+    var h = '<article class="kcard"><button class="kname" type="button" data-act="edit" data-id="' + r.id + '">' + esc(r.name) + exTag(r) + '</button>' +
+      '<div class="kmeta"><b>' + esc(r.contact) + '</b>' + (r.vertical ? ' &middot; ' + esc(r.vertical) : '') + (r.referredBy ? '<br>Ref: ' + esc(r.referredBy) : '') + '</div>';
+    if (r.callBack && !i.closed && r.status !== 'Lost') h += '<div class="note' + (callbackDue(r) ? ' warn' : '') + '" style="padding:6px 9px;font-size:12px">Call back ' + esc(fmtStamp(r.callBack)) + '</div>';
+    if (i.closed) h += '<div class="kmeta">Policy <b>' + esc(r.policyNo) + '</b><br>Expires <b>' + esc(fmtDate(r.expiryDate)) + '</b></div>';
+    h += '<div class="actions"><button class="btn small" type="button" data-act="studio" data-id="' + r.id + '">Send card</button>' + advanceBtn(r, at) + '</div></article>';
+    return h;
+  }
+  function advanceBtn(r, at) {
+    if (at < 0 || at >= FLOW.length - 1) return '';
+    return '<button class="btn small primary" type="button" data-act="advance" data-id="' + r.id + '">' + (at === FLOW.length - 2 ? 'Policy issued' : NEXT_LABEL[at]) + ' &rarr;</button>';
+  }
+
+  function renewalsView(rows) {
+    rows.sort(function (a, b) { return String(a.expiryDate).localeCompare(String(b.expiryDate)); });
+    return '<div class="sec-title"><h2>Renewals</h2><span class="muted" style="font-size:13px">Soonest expiry first</span></div><div class="list">' +
+      (rows.map(renewCard).join('') || '<div class="empty">No issued policies yet. When a lead reaches "Policy issued" it appears here.</div>') + '</div>';
+  }
+  function renewCard(r) {
+    var i = leadInfo(r), d = i.days;
+    var tone = i.expired ? 'bad' : i.due ? (d <= 7 ? 'bad' : 'warn') : '';
+    var pct = d === null ? 0 : Math.max(0, Math.min(100, Math.round((1 - Math.max(0, d) / 365) * 100)));
+    var left = d === null ? '' : d < 0 ? 'Expired ' + Math.abs(d) + ' days ago' : d === 0 ? 'Expires today' : d + ' days left';
+    var flag = i.due ? '<div class="note warn"><b>' + (d <= 7 ? 'Critical' : d <= 15 ? 'Urgent' : 'Due soon') + ':</b> renewal due in ' + d + ' day' + (d === 1 ? '' : 's') + '. Send the reminder card now.</div>' : '';
+    var num = r.whatsapp || r.contact, me = getUser();
+    return '<article class="card' + (i.due ? ' alert' : '') + '"><div class="card-head"><div><span class="kind">Renewal</span><h3>' + esc(r.name) + exTag(r) + '</h3>' +
+      meta([['Policy', r.policyNo], ['Mobile', num], ['Email', r.email]]) + '</div><span class="pill t-' + (tone || 'ok') + '">' + esc(fmtDate(r.expiryDate)) + '</span></div>' +
+      '<div class="daybar ' + tone + '"><div class="tr"><div class="fl" style="width:' + pct + '%"></div></div><div class="row"><span>Policy year used</span><b>' + left + '</b></div></div>' + flag +
+      '<div class="actions"><button class="btn small primary" type="button" data-act="studio" data-id="' + r.id + '">Send renewal card</button>' +
+      '<a class="btn small" href="tel:+' + esc(phone(num)) + '">Call ' + esc(num) + '</a>' +
+      (me ? '<a class="btn small" target="_blank" rel="noopener" href="mailto:' + encodeURIComponent(me) + '?subject=' + encodeURIComponent('Renewal reminder: ' + r.name + ', policy ' + r.policyNo + ', expires ' + fmtDate(r.expiryDate)) + '&body=' + encodeURIComponent('Customer: ' + r.name + '\nMobile: ' + num + '\nPolicy: ' + r.policyNo + '\nExpiry: ' + fmtDate(r.expiryDate) + ' (' + d + ' days left)\n\nContact the customer for renewal.') + '">Email me reminder</a>' : '') +
+      '<button class="btn small" type="button" data-act="edit" data-id="' + r.id + '">Edit</button></div></article>';
+  }
+
+  function cardsView(rows, fn, empty) { return '<div class="list">' + (rows.map(fn).join('') || '<div class="empty">' + empty + '</div>') + '</div>'; }
+  function exTag(r) { return r.ex ? '<span class="tag-example">Example</span>' : ''; }
+  function meta(items) { return '<div class="meta">' + items.filter(function (i) { return i[1]; }).map(function (i) { return '<span>' + i[0] + ' <b>' + esc(i[1]) + '</b></span>'; }).join('') + '</div>'; }
+  function pill(t, tone) { return '<span class="pill t-' + tone + '">' + esc(t) + '</span>'; }
+
+  function claimCard(r) {
+    var tone = r.status === 'Under Query' ? 'warn' : /Approved|Settled/.test(r.status) ? 'ok' : 'info';
+    var at = CLAIM_FLOW.indexOf(r.status);
+    var h = '<article class="card"><div class="card-head"><div><span class="kind">Claim</span><h3>' + esc(r.name) + exTag(r) + '</h3>' +
+      meta([['Policy', r.policyNo], ['Claim reg no', r.claimNo], ['Customer', r.mobile], ['Nominee', r.nominee]]) + '</div>' + pill(r.status, tone) + '</div>';
+    h += '<div class="steps">' + CLAIM_FLOW.map(function (s, k) { return '<i class="' + (k <= at ? 'on' : '') + '"></i>'; }).join('') + '</div>';
+    if (r.status === 'Under Query' && r.queryNote) h += '<div class="note warn"><b>Query:</b> ' + esc(r.queryNote) + '</div>';
+    return h + '<div class="actions"><button class="btn small primary" type="button" data-act="studio" data-id="' + r.id + '">Send card</button>' +
+      (r.status !== 'Claim Settled' ? '<button class="btn small" type="button" data-act="done" data-id="' + r.id + '">Mark settled</button>' : '') +
+      '<button class="btn small" type="button" data-act="edit" data-id="' + r.id + '">Edit</button></div></article>';
+  }
+  function cancelCard(r) {
+    var tone = r.status === 'Resolved' ? 'ok' : r.status === 'In Progress' ? 'info' : 'bad';
+    return '<article class="card"><div class="card-head"><div><span class="kind">Policy cancellation</span><h3>' + esc(r.name) + exTag(r) + '</h3>' +
+      meta([['Loan', r.loanNo], ['Policy', r.policyNo], ['Contact', r.contact]]) + '</div>' + pill(r.status, tone) + '</div>' +
+      '<div class="actions"><button class="btn small primary" type="button" data-act="studio" data-id="' + r.id + '">Send card</button>' +
+      (r.status !== 'Resolved' ? '<button class="btn small" type="button" data-act="done" data-id="' + r.id + '">Mark resolved</button>' : '') +
+      '<button class="btn small" type="button" data-act="edit" data-id="' + r.id + '">Edit</button></div></article>';
+  }
+
+  /* ---------- entry sheet ---------- */
+  function syncForm() {
+    var t = $('type').value;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-sec]'), function (s) { s.hidden = s.getAttribute('data-sec') !== t; });
+    $('closedGroup').hidden = !(t === 'Lead' && $('Lead_status').value === CLOSED);
+    $('queryBox').hidden = !(t === 'Claim' && $('Claim_status').value === 'Under Query');
+  }
+  function clearForm() {
+    Array.prototype.forEach.call(document.querySelectorAll('#entryForm input, #entryForm textarea'), function (el) { el.value = ''; });
+    ['Lead_status', 'Claim_status', 'Cancel_status'].forEach(function (id) { $(id).selectedIndex = 0; });
+    $('formErr').textContent = ''; $('logList').innerHTML = '';
+  }
+  function openSheet(id) {
+    clearForm(); state.editing = id || null; state.delArmed = false;
+    $('delBtn').hidden = !id; $('delBtn').textContent = 'Delete'; $('delBtn').classList.remove('armed');
+    if (id) {
+      var r = byId(id); if (!r) return;
+      $('type').value = r.type;
+      Array.prototype.forEach.call(document.querySelectorAll('[data-sec="' + r.type + '"] [name]'), function (el) { if (r[el.name] != null) el.value = r[el.name]; });
+      $('sheetTitle').textContent = 'Edit entry';
+      $('logList').innerHTML = (r.log || []).slice().reverse().slice(0, 8).map(function (l) { return '<div><b>' + esc(fmtStamp(l.t)) + '</b> ' + esc(l.text) + '</div>'; }).join('');
+    } else { $('type').value = 'Lead'; $('sheetTitle').textContent = 'New entry'; }
+    $('type').disabled = !!id;
+    syncForm(); $('sheetWrap').hidden = false;
+  }
+  function submitForm(e) {
+    e.preventDefault();
+    var t = $('type').value, rec = { type: t };
+    Array.prototype.forEach.call(document.querySelectorAll('[data-sec="' + t + '"] [name]'), function (el) {
+      if (el.closest('#closedGroup') && $('closedGroup').hidden) return;
+      if (el.closest('#queryBox') && $('queryBox').hidden) return;
+      rec[el.name] = el.value.trim();
+    });
+    var req = REQUIRED[t].slice();
+    if (t === 'Lead' && rec.status === CLOSED) req = req.concat([['policyNo', 'policy number'], ['expiryDate', 'policy expiry date'], ['whatsapp', 'customer mobile no']]);
+    for (var k = 0; k < req.length; k++) if (!rec[req[k][0]]) { $('formErr').textContent = 'Enter the ' + req[k][1] + ' to save this entry.'; return; }
+    if (rec.email && !/^\S+@\S+\.\S+$/.test(rec.email)) { $('formErr').textContent = 'Enter a valid email address.'; return; }
+    var note = $('noteIn').value.trim();
+    var list = records().slice();
+    if (state.editing) {
+      list = list.map(function (r) {
+        if (r.id !== state.editing) return r;
+        var n = Object.assign({ id: r.id, ex: r.ex, log: r.log || [] }, rec);
+        if (rec.status !== r.status) n.log = n.log.concat([{ t: nowStamp(), text: 'Status: ' + rec.status }]);
+        if (note) n.log = n.log.concat([{ t: nowStamp(), text: note }]);
+        return n;
+      });
+    } else {
+      rec.id = 'r' + Date.now(); rec.log = [{ t: nowStamp(), text: 'Entry created: ' + rec.status }];
+      if (note) rec.log.push({ t: nowStamp(), text: note });
+      list.unshift(rec);
+    }
+    save(list); $('sheetWrap').hidden = true; render(); toast('Entry saved');
+  }
+
+  /* ---------- messages ---------- */
+  function advisor() { var p = getProf(); return p.name || (getUser() || '').split('@')[0] || 'Your advisor'; }
+  function recipient(r, to) {
+    if (r.type === 'Claim') return to === 'nominee' ? r.nominee : r.mobile;
+    if (r.type === 'Lead') return leadInfo(r).closed ? (r.whatsapp || r.contact) : r.contact;
+    return r.contact;
+  }
+  function kindsFor(r) {
+    if (r.type === 'Lead') return leadInfo(r).closed ? [['renewal', 'Renewal reminder'], ['issued', 'Policy issued']] : [['status', 'Status update']];
+    return [['status', 'Status update']];
+  }
+  function defaultKind(r) {
+    if (r.type === 'Lead' && leadInfo(r).closed) { var d = leadInfo(r).days; return d !== null && d <= 90 ? 'renewal' : 'issued'; }
+    return 'status';
+  }
+  function bodyFor(r, kind) {
+    if (r.type === 'Lead') {
+      var i = leadInfo(r);
+      if (kind === 'renewal') {
+        var d = i.days, when = d === null ? 'is due for renewal' : d < 0 ? 'expired on ' + fmtDate(r.expiryDate) : 'expires on ' + fmtDate(r.expiryDate) + ' (' + d + ' day' + (d === 1 ? '' : 's') + ' left)';
+        return 'Your health insurance policy ' + r.policyNo + ' ' + when + '. Renewing on time keeps your cover and waiting period benefits continuous. Reply to this message and I will complete the renewal for you.';
+      }
+      if (kind === 'issued') return 'Congratulations. Your health insurance policy ' + r.policyNo + ' is now active until ' + fmtDate(r.expiryDate) + '. I will remind you before the renewal date so your cover never lapses.';
+      var at = FLOW.indexOf(r.status);
+      return [
+        'Thank you for choosing us for your health insurance. ' + (r.callBack ? 'I will call you on ' + fmtStamp(r.callBack) + ' to understand your needs and suggest the right plan.' : 'I will call you shortly to understand your needs and suggest the right plan.'),
+        'Thank you for sharing your details. I have noted your requirements and will guide you on the best plan. Please confirm the plan so we can move to payment.',
+        'We have received your payment. Thank you. Your policy is now being processed and I will keep you updated at every step.',
+        'Your policy issuance is in process. You will receive the policy documents on your mobile and email as soon as it is issued.'
+      ][Math.max(0, Math.min(3, at))];
+    }
+    if (r.type === 'Claim') {
+      var m = 'Update on your claim ' + r.claimNo + ' for policy ' + r.policyNo + '. Current status: ' + r.status + '.';
+      if (r.status === 'Under Query' && r.queryNote) m += ' The insurer needs: ' + r.queryNote + ' Please send these documents so we can proceed.';
+      return m;
+    }
+    return 'Update on the cancellation of policy ' + r.policyNo + ' linked to loan ' + r.loanNo + '. Current status: ' + r.status + '.';
+  }
+  function shareText(r, body, tone, to) {
+    var nm = r.type === 'Claim' && to === 'nominee' ? 'Sir or Madam' : r.name;
+    var hi = tone === 'formal' ? 'Respected ' + nm + ',' : 'Dear ' + nm + ',';
+    var bye = tone === 'formal' ? 'Yours sincerely,' : 'Warm regards,';
+    var p = getProf();
+    return hi + '\n\n' + body + '\n\n' + bye + '\n' + advisor() + (p.phone ? '\n' + p.phone : '');
+  }
+  function specFor(r, kind, body) {
+    var s = { kicker: 'UPDATE', title: '', sub: r.name, rows: [], progress: null, pill: '', message: body };
+    if (r.type === 'Lead') {
+      var i = leadInfo(r);
+      if (kind === 'renewal') {
+        s.kicker = 'RENEWAL REMINDER'; s.title = i.expired ? 'Your policy has expired' : 'Time to renew your policy';
+        s.pill = i.days === null ? '' : i.days < 0 ? 'EXPIRED ' + Math.abs(i.days) + ' DAYS AGO' : i.days === 0 ? 'EXPIRES TODAY' : i.days + ' DAYS LEFT';
+        s.rows = [['Policy number', r.policyNo], ['Expiry date', fmtDate(r.expiryDate)], ['Plan', r.vertical]];
+      } else if (kind === 'issued') {
+        s.kicker = 'POLICY ISSUED'; s.title = 'Welcome. You are covered'; s.pill = 'ACTIVE';
+        s.rows = [['Policy number', r.policyNo], ['Valid until', fmtDate(r.expiryDate)], ['Plan', r.vertical]];
+      } else {
+        var at = Math.max(0, FLOW.indexOf(r.status));
+        s.kicker = 'POLICY STATUS'; s.title = FLOW_TITLE[at]; s.progress = { at: at, n: 5, label: 'Step ' + (at + 1) + ' of 5' };
+        s.rows = [['Plan', r.vertical], ['Next call back', r.callBack && at === 0 ? fmtStamp(r.callBack) : '']];
+      }
+    } else if (r.type === 'Claim') {
+      var ci = Math.max(0, CLAIM_FLOW.indexOf(r.status));
+      s.kicker = 'CLAIM UPDATE'; s.title = r.status; s.progress = { at: ci, n: 5, label: 'Step ' + (ci + 1) + ' of 5' };
+      s.rows = [['Claim reg no', r.claimNo], ['Policy number', r.policyNo]];
+    } else {
+      var xi = Math.max(0, CANCEL_FLOW.indexOf(r.status));
+      s.kicker = 'CANCELLATION UPDATE'; s.title = r.status; s.progress = { at: xi, n: 3, label: 'Step ' + (xi + 1) + ' of 3' };
+      s.rows = [['Policy number', r.policyNo], ['Loan number', r.loanNo]];
+    }
+    s.rows = s.rows.filter(function (x) { return x[1]; });
+    return s;
+  }
+
+  /* ---------- card image ---------- */
+  function wrapText(g, text, maxW, maxLines) {
+    var words = String(text).replace(/\s+/g, ' ').trim().split(' '), lines = [], line = '';
+    words.forEach(function (w) {
+      var t = line ? line + ' ' + w : w;
+      if (g.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t;
+    });
+    if (line) lines.push(line);
+    if (lines.length > maxLines) { lines = lines.slice(0, maxLines); lines[maxLines - 1] = lines[maxLines - 1].replace(/\s*\S*$/, '') + '...'; }
+    return lines;
+  }
+  function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+  var HD = '800 {s}px Syne, "Segoe UI", Arial, sans-serif', BD = '{w} {s}px Manrope, "Segoe UI", Arial, sans-serif';
+  function fnt(tpl, s, w) { return tpl.replace('{s}', s).replace('{w}', w || 500); }
+
+  function drawCard(cv, s) {
+    var W = 1080, H = 1350, g = cv.getContext('2d'), p = getProf();
+    cv.width = W; cv.height = H;
+    g.fillStyle = '#eef0fb'; g.fillRect(0, 0, W, H);
+    var gr = g.createLinearGradient(0, 0, W, 560); gr.addColorStop(0, '#1d31bd'); gr.addColorStop(1, '#4a62ff');
+    g.fillStyle = gr; g.fillRect(0, 0, W, 560);
+    g.fillStyle = 'rgba(255,255,255,.08)'; g.beginPath(); g.arc(930, 80, 270, 0, 7); g.fill();
+    g.beginPath(); g.arc(80, 560, 150, 0, 7); g.fill();
+    // brand
+    g.fillStyle = '#ffc83d'; rr(g, 60, 56, 62, 62, 18); g.fill();
+    g.fillStyle = '#3a2a00'; g.font = fnt(HD, 36); g.textBaseline = 'middle'; g.textAlign = 'center'; g.fillText((p.company || 'Policy Desk').charAt(0).toUpperCase(), 91, 89);
+    g.textAlign = 'left'; g.fillStyle = '#ffffff'; g.font = fnt(BD, 32, 800); g.fillText(p.company || 'Policy Desk', 140, 89);
+    // kicker
+    g.font = fnt(BD, 24, 800); var kw = g.measureText(s.kicker).width + 48;
+    g.fillStyle = 'rgba(255,255,255,.18)'; rr(g, W - 60 - kw, 64, kw, 50, 25); g.fill();
+    g.fillStyle = '#ffffff'; g.fillText(s.kicker, W - 60 - kw + 24, 90);
+    // title
+    g.textBaseline = 'alphabetic'; g.fillStyle = '#ffffff'; g.font = fnt(HD, 74);
+    var tl = wrapText(g, s.title, 900, 2), y = 232;
+    tl.forEach(function (l) { g.fillText(l, 60, y); y += 84; });
+    g.fillStyle = '#ffc83d'; g.font = fnt(BD, 40, 700); g.fillText('For ' + s.sub, 60, y + 18);
+    if (s.pill) {
+      g.font = fnt(BD, 28, 800); var pw = g.measureText(s.pill).width + 56, py = y + 58;
+      g.fillStyle = '#ffc83d'; rr(g, 60, py, pw, 58, 29); g.fill();
+      g.fillStyle = '#3a2a00'; g.textBaseline = 'middle'; g.fillText(s.pill, 88, py + 30); g.textBaseline = 'alphabetic';
+    }
+    // white card
+    var cy = 540, ch = 590;
+    g.save(); g.shadowColor = 'rgba(20,30,100,.22)'; g.shadowBlur = 40; g.shadowOffsetY = 16; g.fillStyle = '#ffffff'; rr(g, 60, cy, 960, ch, 36); g.fill(); g.restore();
+    var iy = cy + 52;
+    if (s.progress) {
+      var n = s.progress.n, gap = 10, sw = (880 - gap * (n - 1)) / n;
+      for (var k = 0; k < n; k++) { g.fillStyle = k <= s.progress.at ? '#2a3fd1' : '#e4e8fb'; rr(g, 100 + k * (sw + gap), iy, sw, 14, 7); g.fill(); }
+      g.fillStyle = '#55608a'; g.font = fnt(BD, 26, 700); g.fillText(s.progress.label, 100, iy + 52);
+      iy += 84;
+    }
+    s.rows.slice(0, 3).forEach(function (row) {
+      g.fillStyle = '#55608a'; g.font = fnt(BD, 24, 700); g.fillText(row[0].toUpperCase(), 100, iy + 22);
+      g.fillStyle = '#0f1433'; g.font = fnt(BD, 38, 800); g.fillText(wrapText(g, row[1], 880, 1)[0], 100, iy + 66);
+      iy += 92;
+    });
+    g.fillStyle = '#d5daf3'; g.fillRect(100, iy + 6, 880, 3);
+    g.fillStyle = '#1b2250'; g.font = fnt(BD, 33, 500);
+    var avail = Math.max(2, Math.floor((cy + ch - 36 - (iy + 56)) / 48));
+    var ml = wrapText(g, s.message, 880, avail), my = iy + 62;
+    ml.forEach(function (l) { g.fillText(l, 100, my); my += 48; });
+    // footer
+    g.fillStyle = '#0f1433'; g.fillRect(0, 1180, W, 170);
+    g.fillStyle = '#ffffff'; g.font = fnt(HD, 40); g.fillText(advisor(), 60, 1255);
+    g.fillStyle = '#c9d1ff'; g.font = fnt(BD, 28, 600);
+    g.fillText([p.phone, p.tag || 'Your health insurance advisor'].filter(Boolean).join('   |   '), 60, 1305);
+  }
+
+  var studioCv = document.createElement('canvas');
+  function studioRefresh() {
+    var st = state.studio; if (!st) return;
+    var r = byId(st.id); if (!r) return;
+    if (!st.edited) $('stMsg').value = bodyFor(r, st.kind);
+    var body = $('stMsg').value;
+    function paint() {
+      drawCard(studioCv, specFor(r, st.kind, body));
+      try { $('cardImg').src = studioCv.toDataURL('image/jpeg', 0.92); } catch (e) {}
+    }
+    paint();
+    if (document.fonts && document.fonts.load) {
+      Promise.all([document.fonts.load('800 40px Syne'), document.fonts.load('700 30px Manrope'), document.fonts.load('500 30px Manrope')]).then(paint, function () {});
+    }
+    var text = shareText(r, body, st.tone, st.to), num = recipient(r, st.to);
+    var wl = $('waLink'), wh = waHref(num, text);
+    wl.href = wh || '#'; wl.hidden = !wh;
+    var subj = st.kind === 'renewal' ? 'Policy renewal reminder, ' + r.policyNo : r.type === 'Claim' ? 'Claim update, ' + r.claimNo : r.type === 'Cancel' ? 'Cancellation update, ' + r.policyNo : 'Your health insurance update';
+    var to = r.type === 'Lead' ? (r.email || '') : '';
+    $('mailLink').href = 'mailto:' + encodeURIComponent(to) + '?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(text);
+    $('stToWrap').hidden = !(r.type === 'Claim' && r.nominee);
+  }
+  function openStudio(id) {
+    var r = byId(id); if (!r) return;
+    var kinds = kindsFor(r);
+    state.studio = { id: id, kind: defaultKind(r), tone: 'friendly', to: 'customer', edited: false };
+    $('stKind').innerHTML = kinds.map(function (k) { return '<option value="' + k[0] + '">' + k[1] + '</option>'; }).join('');
+    $('stKind').value = state.studio.kind; $('stKind').disabled = kinds.length < 2;
+    $('stTone').value = 'friendly'; $('stTo').value = 'customer';
+    $('studioTitle').textContent = 'Send update to ' + r.name;
+    $('studioWrap').hidden = false; studioRefresh();
+  }
+  function copyImage() {
+    studioCv.toBlob(function (blob) {
+      if (!blob || !navigator.clipboard || !window.ClipboardItem) { toast('Copy is not available here. Press and hold the card to save it.'); return; }
+      navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function () { toast('Image copied. Paste it into WhatsApp or your email.'); }, function () { toast('Copy was blocked. Press and hold the card to save it.'); });
+    }, 'image/png');
+  }
+
+  /* ---------- csv ---------- */
+  function csv() {
+    var cols = ['type', 'name', 'contact', 'mobile', 'nominee', 'referredBy', 'vertical', 'callBack', 'status', 'policyNo', 'claimNo', 'loanNo', 'expiryDate', 'email', 'whatsapp', 'queryNote', 'comments'];
+    var head = ['Type', 'Customer', 'Contact', 'Customer mobile', 'Nominee mobile', 'Referred by', 'Vertical', 'Call back', 'Status', 'Policy no', 'Claim reg no', 'Loan no', 'Expiry date', 'Email', 'Mobile for renewal', 'Query note', 'Comments'];
+    function cell(v) { v = v == null ? '' : String(v); return /[",\t\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+    var lines = [head.join('\t')];
+    records().forEach(function (r) { lines.push(cols.map(function (c) { return cell(r[c]); }).join('\t')); });
+    return lines.join('\n');
+  }
+
+  /* ---------- views and events ---------- */
+  function showApp() {
+    var u = getUser();
+    $('loginView').hidden = !!u; $('appView').hidden = !u;
+    if (u) { $('who').textContent = u; render(); }
+  }
+  function closeAll() { ['sheetWrap', 'studioWrap', 'profileWrap', 'backupWrap'].forEach(function (id) { $(id).hidden = true; }); }
+
+  $('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = $('loginEmail').value.trim();
+    if (!/^\S+@\S+\.\S+$/.test(v)) { $('loginErr').textContent = 'Enter a valid email ID, like name@example.com.'; return; }
+    $('loginErr').textContent = ''; setUser(v); showApp();
+  });
+  $('logout').addEventListener('click', function () { setUser(''); showApp(); });
+  $('addBtn').addEventListener('click', function () { openSheet(); });
+  $('closeSheet').addEventListener('click', closeAll);
+  $('cancelSheet').addEventListener('click', closeAll);
+  $('closeStudio').addEventListener('click', closeAll);
+  $('closeProfile').addEventListener('click', closeAll);
+  $('closeBackup').addEventListener('click', closeAll);
+  ['sheetWrap', 'studioWrap', 'profileWrap', 'backupWrap'].forEach(function (id) { $(id).addEventListener('click', function (e) { if (e.target === $(id)) closeAll(); }); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeAll(); });
+  $('type').addEventListener('change', syncForm);
+  $('Lead_status').addEventListener('change', syncForm);
+  $('Claim_status').addEventListener('change', syncForm);
+  $('entryForm').addEventListener('submit', submitForm);
+  $('delBtn').addEventListener('click', function () {
+    if (!state.delArmed) { state.delArmed = true; $('delBtn').textContent = 'Tap again to delete'; $('delBtn').classList.add('armed'); return; }
+    var id = state.editing; save(records().filter(function (r) { return r.id !== id; })); closeAll(); render(); toast('Entry deleted');
+  });
+  $('search').addEventListener('input', function (e) { state.q = e.target.value; render(); });
+  $('copyCsv').addEventListener('click', function () { copy(csv(), 'Copied. Paste it into Excel or Google Sheets.'); });
+  $('clearExamples').addEventListener('click', function () { save(records().filter(function (r) { return !r.ex; })); render(); toast('Examples removed'); });
+
+  $('stKind').addEventListener('change', function () { state.studio.kind = $('stKind').value; state.studio.edited = false; studioRefresh(); });
+  $('stTone').addEventListener('change', function () { state.studio.tone = $('stTone').value; studioRefresh(); });
+  $('stTo').addEventListener('change', function () { state.studio.to = $('stTo').value; studioRefresh(); });
+  $('stMsg').addEventListener('input', function () { state.studio.edited = true; clearTimeout(studioRefresh.t); studioRefresh.t = setTimeout(studioRefresh, 250); });
+  $('copyImg').addEventListener('click', copyImage);
+  $('copyTxt').addEventListener('click', function () { var st = state.studio, r = byId(st.id); copy(shareText(r, $('stMsg').value, st.tone, st.to), 'Message copied'); });
+
+  $('profileBtn').addEventListener('click', function () {
+    var p = getProf(); $('pName').value = p.name; $('pPhone').value = p.phone; $('pCompany').value = p.company; $('pTag').value = p.tag; $('profileWrap').hidden = false;
+  });
+  $('saveProfile').addEventListener('click', function () {
+    setProf({ name: $('pName').value.trim(), phone: $('pPhone').value.trim(), company: $('pCompany').value.trim(), tag: $('pTag').value.trim() });
+    closeAll(); toast('Details saved. They appear on every card.');
+  });
+
+  $('backupBtn').addEventListener('click', function () {
+    $('backupOut').value = JSON.stringify({ app: 'policydesk', v: 1, records: records() });
+    $('backupIn').value = ''; $('backupErr').textContent = ''; $('backupWrap').hidden = false;
+  });
+  $('copyBackup').addEventListener('click', function () { copy($('backupOut').value, 'Backup copied'); });
+  $('restoreBtn').addEventListener('click', function () {
+    try {
+      var d = JSON.parse($('backupIn').value);
+      if (!d || d.app !== 'policydesk' || !Array.isArray(d.records)) throw new Error('bad');
+      save(d.records); closeAll(); render(); toast('Restored ' + d.records.length + ' records');
+    } catch (err) { $('backupErr').textContent = 'That text is not a Policy Desk backup. Paste the full text you copied from Backup.'; }
+  });
+
+  document.addEventListener('click', function (e) {
+    var v = e.target.closest('[data-view]');
+    if (v) { state.view = v.getAttribute('data-view'); state.q = ''; $('search').value = ''; render(); return; }
+    var b = e.target.closest('[data-act]'); if (!b) return;
+    var id = b.getAttribute('data-id'), act = b.getAttribute('data-act');
+    if (act === 'edit') openSheet(id);
+    else if (act === 'studio') openStudio(id);
+    else if (act === 'advance') {
+      var cur = byId(id); if (!cur) return;
+      var nx = FLOW[FLOW.indexOf(cur.status) + 1];
+      if (nx === CLOSED) { openSheet(id); $('Lead_status').value = CLOSED; syncForm(); $('Lead_policyNo').focus(); }
+      else { setStatus(id, nx); render(); toast('Moved to: ' + nx); }
+    }
+    else if (act === 'done') {
+      save(records().map(function (r) {
+        if (r.id !== id) return r; var n = Object.assign({}, r); n.status = r.type === 'Claim' ? 'Claim Settled' : 'Resolved';
+        n.log = (r.log || []).concat([{ t: nowStamp(), text: 'Status: ' + n.status }]); return n;
+      }));
+      render(); toast('Marked done');
+    }
+  });
+
+  showApp();
+})();
+</script>
+
+</body></html>
